@@ -1,0 +1,45 @@
+- hosts: webservers
+  become: true
+  vars:
+    message_vm2: "Hello World from SJSU-2"
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install python3 and pip3
+      apt:
+        name: 
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Install Flask
+      pip:
+        name: flask
+        executable: pip3
+
+    - name: Create Flask app
+      copy:
+        dest: /home/ubuntu/app.py
+        content: |
+          from flask import Flask
+          app = Flask(__name__)
+
+          @app.route("/")
+          def hello():
+              return "{{ message_vm2 }}"
+
+          if __name__ == "__main__":
+              app.run(host="0.0.0.0", port=8080)
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Start Flask app
+      shell: nohup python3 /home/ubuntu/app.py &
+      args:
+        chdir: /home/ubuntu
+      async: 0
+      poll: 0
+

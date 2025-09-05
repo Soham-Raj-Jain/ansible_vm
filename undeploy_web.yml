@@ -1,0 +1,11 @@
+- hosts: webservers
+  become: true
+  tasks:
+    - name: Kill Flask app if running
+      shell: pkill -f app.py || true
+
+    - name: Remove Flask app file
+      file:
+        path: /home/ubuntu/app.py
+        state: absent
+
